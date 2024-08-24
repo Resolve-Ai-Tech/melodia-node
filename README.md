@@ -12,16 +12,11 @@ Se você ainda não tem o PostgreSQL instalado, siga os passos abaixo:
 
 ### Configuração do Banco de Dados
 
-1. Conecte-se ao PostgreSQL utilizando o psql ou pgAdmin.
-2. Execute os seguintes comandos SQL para criar o banco de dados melodia, as tabelas necessárias e popular com dados fictícios:
-   
+1. Conecte-se ao PostgreSQL usando psql, pgAdmin, DBeaver ou outra ferramenta de sua preferência.
+2. Crie um banco de dados chamado `melodia`.
+3. Conecte-se ao banco de dados `melodia`.
+4. Execute os seguintes comandos SQL para criar as tabelas necessárias e popular o banco com dados fictícios:
 ```sql
--- Criação do banco de dados (execute apenas se necessário)
-CREATE DATABASE melodia;
-
--- Conecte-se ao banco de dados melodia
-\c melodia;
-
 -- Criação das tabelas
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
