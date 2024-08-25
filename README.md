@@ -1,157 +1,65 @@
-## Configuração Inicial
+# Fluxo de Desenvolvimento
 
-### Instalação do PostgreSQL
+Este fluxo de desenvolvimento descreve como as branches devem ser gerenciadas no repositório, desde o início do trabalho em uma tarefa até a conclusão e a integração na branch principal.
 
-Se você ainda não tem o PostgreSQL instalado, siga os passos abaixo:
-
-#### No Windows:
-
-1. [Baixe o PostgreSQL 16](https://sbp.enterprisedb.com/getfile.jsp?fileid=1259129) e execute o instalador.
-2. Durante a instalação, configure a senha do superusuário (`postgres`).
-3. Finalize a instalação e abra o pgAdmin para gerenciar o banco de dados.
-
-### Configuração do Banco de Dados
-
-1. Conecte-se ao PostgreSQL usando psql, pgAdmin, DBeaver ou outra ferramenta de sua preferência.
-2. Crie um banco de dados chamado `melodia`.
-3. Conecte-se ao banco de dados `melodia`.
-4. Execute os seguintes comandos SQL para criar as tabelas necessárias e popular o banco com dados fictícios:
+## 1. Atualizar a Branch `main`
+- Antes de iniciar o trabalho em uma nova tarefa, certifique-se de estar na branch `main`.
+- Atualize a branch main para garantir que você esteja trabalhando na versão mais recente:
 ```sql
--- Criação das tabelas
-CREATE TABLE usuarios (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    senha VARCHAR(255) NOT NULL,
-    nome VARCHAR(255) NOT NULL
-);
+git checkout main
+git pull
+```
 
-CREATE TABLE musicas (
-    id SERIAL PRIMARY KEY,
-    titulo VARCHAR(255) NOT NULL,
-    artista VARCHAR(255) NOT NULL,
-    album VARCHAR(255),
-    genero VARCHAR(50),
-    duracao INT NOT NULL,
-    capaUrl VARCHAR(255)
-);
+## 2. Criar uma Nova Branch para a Tarefa
+- Toda nova tarefa deve ser desenvolvida em uma branch separada, criada a partir da branch `main`.
+- Para criar a branch, use o comando:
+```sql
+git checkout -b <numero_da_tarefa>
+```
+- Substitua `<numero_da_tarefa>` pelo número da tarefa. Por exemplo, para a tarefa `112922`:
+```sql
+git checkout -b 112922
+```
 
-CREATE TABLE playlists (
-    id SERIAL PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    descricao TEXT,
-    usuario_id INT REFERENCES usuarios(id) ON DELETE CASCADE
-);
+## 3. Desenvolver a Tarefa
+- Realize o desenvolvimento e faça commits frequentemente, seguindo as boas práticas de commit.
+- Use os seguintes comandos para adicionar suas alterações ao controle de versão:
+```sql
+git add .
+git commit -m "Mensagem do commit"
+git push origin <numero_da_tarefa>
+```
+- Certifique-se de que todos os testes estão passando antes de prosseguir para o próximo passo.
+- **Padrão de Mensagem de Commit**: Utilize uma mensagem clara e descritiva para o commit. O formato recomendado é:
+```sql
+#numero_da_tarefa tipo: breve descrição
+```
+- **Exemplo:** `#112922 feat: Implementação da lógica de sincronização de músicas`
+- Os tipos de commits podem incluir:
+  - `feat`: nova funcionalidade
+  - `fix`: correção de bugs
 
-CREATE TABLE playlist_musicas (
-    playlist_id INT REFERENCES playlists(id) ON DELETE CASCADE,
-    musica_id INT REFERENCES musicas(id) ON DELETE CASCADE,
-    PRIMARY KEY (playlist_id, musica_id)
-);
+## 4. Criar um Pull Request (PR)
+- Após subir as alterações para o GitHub, siga os passos abaixo para criar um Pull Request (PR):
+  - Acesse o repositório no GitHub.
+  - Clique na aba `Pull requests`.
+  - Clique no botão `New pull request`.
+  - Selecione a branch `develop` como base (`base`) e a sua branch de tarefa como compare (`compare`).
+  - Verifique as alterações e, se tudo estiver correto, clique em `Create pull request`.
+  - No campo de descrição, informe detalhadamente as alterações realizadas e faça referência ao número da tarefa.
+  - Clique em `Create pull request` novamente para confirmar.
 
-CREATE TABLE avaliacoes_musicas (
-    id SERIAL PRIMARY KEY,
-    musica_id INT REFERENCES musicas(id) ON DELETE CASCADE,
-    usuario_id INT REFERENCES usuarios(id) ON DELETE CASCADE,
-    avaliacao TEXT NOT NULL,
-    sentimento VARCHAR(50) NOT NULL
-);
+## 5. Atualizar a Branch `main` para Iniciar uma Nova Tarefa
+- Após criar o PR, volte para a branch `main`, atualize ela para garantir que você tenha a versão mais recente.para iniciar a próxima tarefa:
+```sql
+git checkout main
+git pull
+```
+- Repita todo o processo novamente (criar branch, desenvolver, etc.) para a próxima tarefa.
 
-CREATE TABLE atividades_usuarios (
-    id SERIAL PRIMARY KEY,
-    usuario_id INT REFERENCES usuarios(id) ON DELETE CASCADE,
-    atividade VARCHAR(50) NOT NULL,
-    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE historico_uso (
-    id SERIAL PRIMARY KEY,
-    usuario_id INT REFERENCES usuarios(id) ON DELETE CASCADE,
-    musica_id INT REFERENCES musicas(id) ON DELETE CASCADE,
-    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    acao VARCHAR(50) NOT NULL  -- Ex: 'play', 'pause', 'skip', etc.
-);
-
-CREATE TABLE tendencias_musicais (
-    id SERIAL PRIMARY KEY,
-    musica_id INT REFERENCES musicas(id) ON DELETE CASCADE,
-    contagem_reproducoes INT NOT NULL,
-    periodo VARCHAR(50) NOT NULL,  -- Ex: 'diario', 'semanal', 'mensal'
-    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE preferencias_usuarios (
-    id SERIAL PRIMARY KEY,
-    usuario_id INT REFERENCES usuarios(id) ON DELETE CASCADE,
-    preferencia VARCHAR(50) NOT NULL,  -- Ex: 'treino', 'relaxamento', 'estudo'
-    genero_preferido VARCHAR(50),  -- Ex: 'Pop', 'Rock', 'Jazz'
-    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Usuários
-INSERT INTO usuarios (email, senha, nome) VALUES
-('alice.smith@example.com', 'hashed_password1', 'Alice Smith'),
-('bob.jones@example.com', 'hashed_password2', 'Bob Jones'),
-('carla.garcia@example.com', 'hashed_password3', 'Carla Garcia');
-
--- Músicas
-INSERT INTO musicas (titulo, artista, album, genero, duracao, capaUrl) VALUES
-('Blinding Lights', 'The Weeknd', 'After Hours', 'Pop', 200, 'http://example.com/covers/blinding_lights.jpg'),
-('Watermelon Sugar', 'Harry Styles', 'Fine Line', 'Pop', 174, 'http://example.com/covers/watermelon_sugar.jpg'),
-('Levitating', 'Dua Lipa', 'Future Nostalgia', 'Pop', 203, 'http://example.com/covers/levitating.jpg'),
-('Shape of You', 'Ed Sheeran', 'Divide', 'Pop', 233, 'http://example.com/covers/shape_of_you.jpg'),
-('Peaches', 'Justin Bieber', 'Justice', 'R&B', 198, 'http://example.com/covers/peaches.jpg'),
-('Rockstar', 'DaBaby', 'Blame It on Baby', 'Hip-Hop', 181, 'http://example.com/covers/rockstar.jpg');
-
--- Playlists
-INSERT INTO playlists (nome, descricao, usuario_id) VALUES
-('Top Hits 2024', 'The best songs of 2024', 1),
-('Relaxing Vibes', 'Chill music to relax and unwind', 2),
-('Workout Mix', 'High-energy tracks to keep you motivated during your workout', 3);
-
--- Associações de músicas em playlists
-INSERT INTO playlist_musicas (playlist_id, musica_id) VALUES
-(1, 1),
-(1, 2),
-(2, 3),
-(2, 5),
-(3, 4),
-(3, 6);
-
--- Avaliações de músicas
-INSERT INTO avaliacoes_musicas (musica_id, usuario_id, avaliacao, sentimento) VALUES
-(1, 1, 'This song is an absolute banger!', 'Positivo'),
-(2, 2, 'Nice summer vibe!', 'Positivo'),
-(3, 3, 'Love the rhythm, but lyrics could be better.', 'Neutro'),
-(4, 1, 'This track never gets old.', 'Positivo'),
-(5, 2, 'Good, but not great.', 'Neutro'),
-(6, 3, 'Perfect for a workout session!', 'Positivo');
-
--- Atividades dos usuários
-INSERT INTO atividades_usuarios (usuario_id, atividade) VALUES
-(1, 'estudo'),
-(2, 'relaxamento'),
-(3, 'treino');
-
--- Dados iniciais para histórico de uso
-INSERT INTO historico_uso (usuario_id, musica_id, acao) VALUES
-(1, 1, 'play'),
-(1, 2, 'pause'),
-(2, 3, 'play'),
-(3, 4, 'skip'),
-(3, 6, 'play');
-
--- Dados iniciais para tendências musicais
-INSERT INTO tendencias_musicais (musica_id, contagem_reproducoes, periodo) VALUES
-(1, 500, 'semanal'),
-(2, 450, 'semanal'),
-(3, 300, 'semanal'),
-(4, 700, 'semanal'),
-(5, 200, 'semanal'),
-(6, 350, 'semanal');
-
--- Dados iniciais para preferências de usuários
-INSERT INTO preferencias_usuarios (usuario_id, preferencia, genero_preferido) VALUES
-(1, 'estudo', 'Jazz'),
-(2, 'relaxamento', 'Pop'),
-(3, 'treino', 'Hip-Hop');
-`````
+## 6. Revisão de Código
+- O líder da equipe será responsável por revisar o código no PR que será enviado para a branch `develop`.
+- Caso haja necessidade de ajustes, o líder deixará comentários no PR para que as correções sejam feitas.
+- Após as correções, faça novos commits na mesma branch e atualize o PR.
+- Após a aprovação do PR e a realização do merge na branch `develop`, o líder da equipe deverá criar um novo PR para atualizar a branch `main` através da branch `develop`.
+- Esse processo garante que todas as alterações aprovadas e testadas sejam integradas na branch `main`, mantendo a integridade e a estabilidade do código principal.
