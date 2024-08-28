@@ -1,0 +1,17 @@
+{
+  "name": "collaborative-playlists",
+  "version": "1.0.0",
+  "description": "Funcionalidade que permite a criação e edição simultânea de playlists por grupos de amigos.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "author": "Rafael Claudeniro",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.4",
+    "collaborative-playlists": "file:",
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  }
+}
